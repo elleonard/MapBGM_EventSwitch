@@ -34,8 +34,7 @@ This means prossibility to cause some weird performance before playing a specifi
 
 This plugin eliminates such weird performance, and provide natural direction like console RPGs.
 In the implementation of this plugin does not play a default bgm when an alternative bgm plays.
-The below figure describes the difference of behavior between the implementation with this plugin    
-and event commands in RPGMV.
+The below figure describes the difference of behavior between the implementation with this plugin and event commands in RPGMV.
 
 ![bgmflow2](https://user-images.githubusercontent.com/64351233/81463464-d03e1a00-91f4-11ea-9ffb-425fcc88df49.png)
 
