@@ -93,58 +93,61 @@
 * v1.00 (May 9, 2020)       Released!
 */
 
-var So_Game_Map_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function (mapId) {
-  So_Game_Map_setup.call(this, mapId);
-  $dataMap.switchbgm_flagID = [];
-  $dataMap.switched_bgm = []; // switch bgm candidate array
-  this.setMapBGMtags();
-};
+(function () {
+  'use strict';
+  var So_Game_Map_setup = Game_Map.prototype.setup;
+  Game_Map.prototype.setup = function (mapId) {
+    So_Game_Map_setup.call(this, mapId);
+    $dataMap.switchbgm_flagID = [];
+    $dataMap.switched_bgm = []; // switch bgm candidate array
+    this.setMapBGMtags();
+  };
 
 
-Game_Map.prototype.setMapBGMtags = function () {
-  //mapswitch tag	
-  var tag = /<(?:mapswitch):[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*)>/i;
+  Game_Map.prototype.setMapBGMtags = function () {
+    //mapswitch tag
+    var tag = /<(?:mapswitch):[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*),[ ]*(.*)>/i;
 
-  var notes = $dataMap.note.split(/[\r\n]+/);
-  for (var n = 0; n < notes.length; n++) {
-    var line = notes[n];
-    console.log(line);
-    if (line.match(tag)) {
-      var ID = parseInt(RegExp.$1);
-      var switchbgm = {
-        name: String(RegExp.$2),
-        volume: parseInt(RegExp.$3),
-        pitch: parseInt(RegExp.$4),
-        pan: parseInt(RegExp.$5),
-        pos: parseInt(RegExp.$6)
-      };
+    var notes = $dataMap.note.split(/[\r\n]+/);
+    for (var n = 0; n < notes.length; n++) {
+      var line = notes[n];
+      console.log(line);
+      if (line.match(tag)) {
+        var ID = parseInt(RegExp.$1);
+        var switchbgm = {
+          name: String(RegExp.$2),
+          volume: parseInt(RegExp.$3),
+          pitch: parseInt(RegExp.$4),
+          pan: parseInt(RegExp.$5),
+          pos: parseInt(RegExp.$6)
+        };
 
-      $dataMap.switchbgm_flagID.push(ID);
-      $dataMap.switched_bgm.push(switchbgm);
+        $dataMap.switchbgm_flagID.push(ID);
+        $dataMap.switched_bgm.push(switchbgm);
+      }
     }
-  }
-};
+  };
 
-//overwrite 
-Game_Map.prototype.autoplay = function () {
-  if ($dataMap.autoplayBgm) {
-    if ($gamePlayer.isInVehicle()) {
-      $gameSystem.saveWalkingBgm2();
-    } else {
-      /////// conditional bgm play
-      if ($dataMap.switched_bgm.length > 0) {
-        for (var i = 0; i < $dataMap.switched_bgm.length; i++) {
-          if ($gameSwitches.value($dataMap.switchbgm_flagID[i])) {
-            AudioManager.playBgm($dataMap.switched_bgm[i]);
-            break;
+  //overwrite
+  Game_Map.prototype.autoplay = function () {
+    if ($dataMap.autoplayBgm) {
+      if ($gamePlayer.isInVehicle()) {
+        $gameSystem.saveWalkingBgm2();
+      } else {
+        /////// conditional bgm play
+        if ($dataMap.switched_bgm.length > 0) {
+          for (var i = 0; i < $dataMap.switched_bgm.length; i++) {
+            if ($gameSwitches.value($dataMap.switchbgm_flagID[i])) {
+              AudioManager.playBgm($dataMap.switched_bgm[i]);
+              break;
+            }
           }
         }
+        else AudioManager.playBgm($dataMap.bgm); //regular bgm on database
       }
-      else AudioManager.playBgm($dataMap.bgm); //regular bgm on database
     }
-  }
-  if ($dataMap.autoplayBgs) {
-    AudioManager.playBgs($dataMap.bgs);
-  }
-};
+    if ($dataMap.autoplayBgs) {
+      AudioManager.playBgs($dataMap.bgs);
+    }
+  };
+})();
