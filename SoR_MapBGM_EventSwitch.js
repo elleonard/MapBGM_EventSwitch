@@ -60,38 +60,38 @@
  * v1.00 (2020/05/09)       公開  
  */
 /*:
-* @plugindesc ＜Conditional BGM switch on Map＞ While a specified switch is ON, BGM in a specified map is force changed.
-* @author Soryu @soryu_rpmaker
-*
-*
-* @help 
-* ------------------------------------------------------------
-* How to use
-* ------------------------------------------------------------
-* - Write note tag in your map which you want to change BGM
-*   with a condition as following format
-* <mapswitch: switchID, BGMname, volume, pitch,　pan, pos>
-*
-* Ex) In case of switch 10 is ON, Change BGM to Battle1 (volume and etc is as the default).
-* <mapswitch: 10, Battle1, 90, 100, 0, 0>
-*
-* Ex) In case of switch 33 is ON, Change BGM to Theme3 (pitch is 150%).
-* <mapswitch:33,Theme3,100,150,0,0>
-*
-* 
-* You can enumerate several "mapswitch" tags in a map.
-* If multiple conditions are hold, tags written earlier on 
-* the note has higher priority to apply. It is expected to express time flow
-* such as morning, noon, and night with different BGMs.
-*
-* To get more instructions, see https://github.com/soryu-rmv .
-*
-*
-* ------------------------------------------------------------
-* Version info
-* ------------------------------------------------------------
-* v1.00 (May 9, 2020)       Released!
-*/
+ * @plugindesc ＜Conditional BGM switch on Map＞ While a specified switch is ON, BGM in a specified map is force changed.
+ * @author Soryu @soryu_rpmaker
+ *
+ *
+ * @help
+ * ------------------------------------------------------------
+ * How to use
+ * ------------------------------------------------------------
+ * - Write note tag in your map which you want to change BGM
+ *   with a condition as following format
+ * <mapswitch: switchID, BGMname, volume, pitch,　pan, pos>
+ *
+ * Ex) In case of switch 10 is ON, Change BGM to Battle1 (volume and etc is as the default).
+ * <mapswitch: 10, Battle1, 90, 100, 0, 0>
+ *
+ * Ex) In case of switch 33 is ON, Change BGM to Theme3 (pitch is 150%).
+ * <mapswitch:33,Theme3,100,150,0,0>
+ *
+ *
+ * You can enumerate several "mapswitch" tags in a map.
+ * If multiple conditions are hold, tags written earlier on
+ * the note has higher priority to apply. It is expected to express time flow
+ * such as morning, noon, and night with different BGMs.
+ *
+ * To get more instructions, see https://github.com/soryu-rmv .
+ *
+ *
+ * ------------------------------------------------------------
+ * Version info
+ * ------------------------------------------------------------
+ * v1.00 (May 9, 2020)       Released!
+ */
 
 (function () {
   'use strict';
@@ -128,26 +128,46 @@
     }
   };
 
-  //overwrite
+  var So_Game_Map_autoplay = Game_Map.prototype.autoplay;
   Game_Map.prototype.autoplay = function () {
-    if ($dataMap.autoplayBgm) {
-      if ($gamePlayer.isInVehicle()) {
-        $gameSystem.saveWalkingBgm2();
-      } else {
-        /////// conditional bgm play
-        if ($dataMap.switched_bgm.length > 0) {
-          for (var i = 0; i < $dataMap.switched_bgm.length; i++) {
-            if ($gameSwitches.value($dataMap.switchbgm_flagID[i])) {
-              AudioManager.playBgm($dataMap.switched_bgm[i]);
-              break;
-            }
-          }
+    if ($dataMap.autoplayBgm && !$gamePlayer.isInVehicle()) {
+      var switchedBgmIndex = $dataMap.switchbgm_flagID.findIndex(function (switchId) {
+        return $gameSwitches.value(switchId);
+      }, this);
+      if (switchedBgmIndex >= 0) {
+        AudioManager.playBgm($dataMap.switched_bgm[switchedBgmIndex]);
+        if ($dataMap.autoplayBgs) {
+          AudioManager.playBgs($dataMap.bgs);
         }
-        else AudioManager.playBgm($dataMap.bgm); //regular bgm on database
+        return;
       }
     }
-    if ($dataMap.autoplayBgs) {
-      AudioManager.playBgs($dataMap.bgs);
-    }
+    So_Game_Map_autoplay.call(this);
   };
+
+  /**
+   * for RMMV 1.5.x
+   */
+  if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function (predicate) {
+      if (this === null) {
+        throw new TypeError('Array.prototype.findIndex called on null or undefined');
+      }
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+      var list = Object(this);
+      var length = list.length >>> 0;
+      var thisArg = arguments[1];
+      var value;
+
+      for (var i = 0; i < length; i++) {
+        value = list[i];
+        if (predicate.call(thisArg, value, i, list)) {
+          return i;
+        }
+      }
+      return -1;
+    };
+  }
 })();
