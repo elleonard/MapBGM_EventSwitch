@@ -1,5 +1,5 @@
 # MapBGM_EventSwitch
-Conditional BGM switch on Map
+Conditional BGM switch on Map (Links for .js are [here](https://github.com/soryu-rmv/MapBGM_EventSwitch))
 
 by @soryu_rpmakermv
 
